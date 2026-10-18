@@ -1,0 +1,156 @@
+:root {
+  --bg: #0f1115;
+  --surface: #1a1d24;
+  --surface-2: #252a33;
+  --text: #f3f4f6;
+  --muted: #9aa3af;
+  --accent: #3b82f6;
+  --rec: #ef4444;
+  --go: #22c55e;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --panel: 33.333%;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); }
+body { overscroll-behavior: none; }
+[hidden] { display: none !important; }
+button { font: inherit; color: inherit; }
+
+/* ---------- Shared ---------- */
+.screen { min-height: 100%; padding: max(12px, env(safe-area-inset-top)) 16px 24px; }
+.bar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.bar h1, .bar h2 { flex: 1; margin: 0; font-size: 1.25rem; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 44px; padding: 0 16px; border: 0; border-radius: 12px;
+  background: var(--surface-2); cursor: pointer; font-weight: 600; font-size: 0.95rem;
+}
+.btn.primary { background: var(--accent); color: #fff; }
+.btn.ghost { background: transparent; padding: 0 8px; }
+.btn.danger { color: #fca5a5; }
+.muted { color: var(--muted); font-size: 0.85rem; }
+.hint { color: var(--muted); font-size: 0.85rem; text-align: center; margin-top: 24px; }
+.row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* ---------- Library ---------- */
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.list li { background: var(--surface); border-radius: 14px; padding: 14px; display: flex; align-items: center; gap: 10px; }
+.list .info { flex: 1; min-width: 0; cursor: pointer; }
+.list .title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.list .meta { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+.list .btn { min-height: 38px; padding: 0 12px; }
+.empty { background: var(--surface); border-radius: 14px; padding: 24px; text-align: center; color: var(--muted); }
+
+/* ---------- Editor ---------- */
+.form { display: grid; gap: 12px; }
+.form input[type=text], .form textarea {
+  width: 100%; background: var(--surface); color: var(--text); border: 1px solid var(--surface-2);
+  border-radius: 12px; padding: 12px; font: inherit; font-size: 1rem;
+}
+.form textarea { min-height: 55vh; resize: vertical; line-height: 1.5; }
+
+/* ---------- Studio ---------- */
+#studio { position: fixed; inset: 0; padding: 0; overflow: hidden; background: #000; touch-action: none; user-select: none; }
+#preview { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+
+#prompter {
+  position: absolute; background: rgba(0, 0, 0, 0.8); overflow: hidden; z-index: 2;
+  --marker: 28%;
+}
+#studio.pos-top #prompter { top: 0; left: 0; right: 0; height: var(--panel); padding-top: env(safe-area-inset-top); }
+#studio.pos-left #prompter { top: 0; bottom: 0; left: 0; width: var(--panel); }
+#studio.pos-right #prompter { top: 0; bottom: 0; right: 0; width: var(--panel); }
+
+#scroller { position: absolute; inset: 0; overflow: hidden; }
+#scriptBody {
+  will-change: transform; padding: 0 6%;
+  font-weight: 600; line-height: 1.35; color: #fff; overflow-wrap: break-word;
+}
+#scriptBody p { margin: 0 0 0.8em; }
+/* Fade out the lines you've already read */
+#scroller::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: calc(var(--marker) - 0.2em);
+  background: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.35)); pointer-events: none;
+}
+#readLine {
+  position: absolute; left: 0; top: var(--marker); width: 0; height: 0;
+  border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 12px solid var(--go);
+  transform: translateY(-2px); pointer-events: none;
+}
+#holdBadge {
+  position: absolute; right: 10px; bottom: 10px; background: rgba(239, 68, 68, 0.9);
+  padding: 6px 12px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;
+}
+
+/* HUD sits in the part of the screen the prompter doesn't cover */
+#hud { position: absolute; z-index: 3; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; }
+#studio.pos-top #hud { top: var(--panel); left: 0; right: 0; bottom: 0; }
+#studio.pos-left #hud { top: 0; bottom: 0; left: var(--panel); right: 0; }
+#studio.pos-right #hud { top: 0; bottom: 0; left: 0; right: var(--panel); }
+#hud > * { pointer-events: auto; }
+
+.chips { display: flex; gap: 8px; padding: 10px; flex-wrap: wrap; }
+.chip {
+  display: inline-flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.55);
+  padding: 6px 12px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;
+}
+.chip.rec { background: rgba(239, 68, 68, 0.9); font-variant-numeric: tabular-nums; }
+#voiceDot { width: 10px; height: 10px; border-radius: 50%; background: #6b7280; display: inline-block; }
+#voiceChip.speaking #voiceDot { background: var(--go); box-shadow: 0 0 8px var(--go); }
+.meter { position: relative; width: 60px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; overflow: hidden; }
+#meterFill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--go); }
+#meterThresh { position: absolute; top: -2px; bottom: -2px; width: 2px; background: #fff; left: 50%; }
+
+.controls {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  padding: 12px 12px max(16px, env(safe-area-inset-bottom));
+}
+.btn.round { width: 48px; height: 48px; padding: 0; border-radius: 50%; background: rgba(0,0,0,0.55); font-size: 1.3rem; }
+.record {
+  width: 74px; height: 74px; border-radius: 50%; border: 4px solid #fff; background: transparent;
+  display: grid; place-items: center; cursor: pointer; padding: 0;
+}
+.record span { width: 56px; height: 56px; border-radius: 50%; background: var(--rec); transition: all 0.2s; }
+.record.on span { width: 28px; height: 28px; border-radius: 6px; }
+#studio.busy .btn.round:not(#settingsBtn):not(#practiceBtn) { opacity: 0.35; pointer-events: none; }
+#practiceBtn.on { background: var(--go); }
+
+#countdown {
+  position: absolute; inset: 0; z-index: 5; display: grid; place-items: center;
+  font-size: 30vmin; font-weight: 800; color: #fff; text-shadow: 0 4px 30px rgba(0,0,0,0.6);
+  pointer-events: none;
+}
+
+#rotateNotice {
+  position: absolute; inset: 0; z-index: 6; background: rgba(15,17,21,0.95);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; text-align: center; padding: 24px;
+}
+#rotateNotice p { font-size: 1.2rem; font-weight: 600; margin: 0; }
+.phone { width: 60px; height: 100px; border: 4px solid #fff; border-radius: 12px; animation: turn 2s ease-in-out infinite; }
+#rotateNotice.to-portrait .phone { animation-name: turnBack; }
+@keyframes turn { 0%, 30% { transform: rotate(0); } 70%, 100% { transform: rotate(-90deg); } }
+@keyframes turnBack { 0%, 30% { transform: rotate(-90deg); } 70%, 100% { transform: rotate(0); } }
+
+.overlay { position: absolute; inset: 0; z-index: 10; background: rgba(0,0,0,0.6); display: flex; align-items: flex-end; justify-content: center; }
+.card { background: var(--surface); border-radius: 16px; padding: 20px; margin: auto 16px; max-width: 420px; }
+.card h2 { margin-top: 0; }
+.sheet {
+  background: var(--surface); width: 100%; max-width: 560px; max-height: 92%; overflow-y: auto;
+  border-radius: 18px 18px 0 0; padding: 16px 16px max(20px, env(safe-area-inset-bottom)); touch-action: pan-y;
+}
+.field { display: grid; gap: 8px; margin-bottom: 18px; }
+.label { font-weight: 600; font-size: 0.9rem; display: flex; justify-content: space-between; }
+.label output { color: var(--muted); font-weight: 500; }
+.seg { display: flex; gap: 6px; background: var(--bg); padding: 4px; border-radius: 12px; }
+.seg button {
+  flex: 1; border: 0; background: transparent; border-radius: 9px; padding: 10px 6px; cursor: pointer;
+  font-weight: 600; font-size: 0.85rem; display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.seg button small { font-weight: 400; color: var(--muted); font-size: 0.72rem; }
+.seg button.active { background: var(--accent); color: #fff; }
+.seg button.active small { color: rgba(255,255,255,0.8); }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+#playback { width: 100%; max-height: 50vh; background: #000; border-radius: 12px; margin-bottom: 12px; }
+.actions { justify-content: flex-end; margin-bottom: 8px; }
+.actions .btn { flex: 1; }

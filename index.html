@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0f1115">
+  <meta name="robots" content="noindex">
+  <title>Prompter</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Script library -->
+  <section id="library" class="screen">
+    <header class="bar">
+      <h1>Prompter</h1>
+      <button id="newScript" class="btn primary">+ New script</button>
+    </header>
+    <ul id="scriptList" class="list"></ul>
+    <p class="hint">Scripts are saved on this phone only.</p>
+  </section>
+
+  <!-- Script editor -->
+  <section id="editor" class="screen" hidden>
+    <header class="bar">
+      <button id="editorBack" class="btn ghost">‹ Back</button>
+      <h1 id="editorHeading">New script</h1>
+      <button id="saveScript" class="btn primary">Save</button>
+    </header>
+    <div class="form">
+      <input id="scriptTitle" type="text" placeholder="Title" maxlength="80">
+      <textarea id="scriptText" placeholder="Paste or type your script here…"></textarea>
+      <div class="row">
+        <label class="btn">Load .txt file<input id="fileInput" type="file" accept=".txt,.md,text/plain" hidden></label>
+        <span id="editorStats" class="muted"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recording studio -->
+  <section id="studio" class="screen" hidden>
+    <video id="preview" autoplay playsinline muted></video>
+
+    <div id="prompter">
+      <div id="scroller"><div id="scriptBody"></div></div>
+      <div id="readLine"></div>
+      <div id="holdBadge" hidden>Paused · tap to resume</div>
+    </div>
+
+    <div id="hud">
+      <div class="chips">
+        <span id="voiceChip" class="chip"><i id="voiceDot"></i><span id="voiceLabel">Mic</span>
+          <span class="meter"><span id="meterFill"></span><span id="meterThresh"></span></span>
+        </span>
+        <span id="timer" class="chip rec" hidden>0:00</span>
+      </div>
+      <div class="controls">
+        <button id="studioBack" class="btn round" aria-label="Back to scripts">‹</button>
+        <button id="restart" class="btn round" aria-label="Back to top">⤒</button>
+        <button id="recordBtn" class="record" aria-label="Start recording"><span></span></button>
+        <button id="practiceBtn" class="btn round" aria-label="Practice without recording">▶</button>
+        <button id="settingsBtn" class="btn round" aria-label="Settings">⚙</button>
+      </div>
+    </div>
+
+    <div id="countdown" hidden></div>
+
+    <div id="rotateNotice" hidden>
+      <div class="phone"></div>
+      <p id="rotateText">Turn your phone sideways</p>
+    </div>
+
+    <div id="cameraError" class="overlay" hidden>
+      <div class="card">
+        <h2>Camera unavailable</h2>
+        <p id="cameraErrorText"></p>
+        <button id="retryCamera" class="btn primary">Try again</button>
+      </div>
+    </div>
+
+    <!-- Settings sheet -->
+    <div id="settings" class="overlay" hidden>
+      <div class="sheet">
+        <header class="bar">
+          <h2>Settings</h2>
+          <button id="closeSettings" class="btn ghost">Done</button>
+        </header>
+
+        <div class="field">
+          <span class="label">Video format</span>
+          <div class="seg" data-setting="format">
+            <button data-value="vertical">Vertical 9:16<small>Reels / Shorts</small></button>
+            <button data-value="horizontal">Horizontal 16:9<small>YouTube</small></button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="label">Scrolling</span>
+          <div class="seg" data-setting="mode">
+            <button data-value="voice">Follow my voice<small>Stops when I pause</small></button>
+            <button data-value="steady">Steady<small>Constant speed</small></button>
+          </div>
+        </div>
+
+        <label class="field">
+          <span class="label">Speed <output data-for="wpm"></output></span>
+          <input type="range" data-setting="wpm" min="80" max="240" step="5">
+        </label>
+
+        <label class="field">
+          <span class="label">Text size <output data-for="fontSize"></output></span>
+          <input type="range" data-setting="fontSize" min="20" max="72" step="2">
+        </label>
+
+        <label class="field">
+          <span class="label">Mic sensitivity <output data-for="sensitivity"></output></span>
+          <input type="range" data-setting="sensitivity" min="0" max="100" step="5">
+          <small class="muted">Raise it if scrolling doesn't start when you talk. Lower it if background noise keeps it moving.</small>
+        </label>
+
+        <label class="field">
+          <span class="label">Pause after silence <output data-for="hangover"></output></span>
+          <input type="range" data-setting="hangover" min="200" max="2000" step="100">
+        </label>
+
+        <div class="field">
+          <span class="label">Text position</span>
+          <div class="seg" data-setting="position">
+            <button data-value="auto">Near camera</button>
+            <button data-value="top">Top</button>
+            <button data-value="left">Left</button>
+            <button data-value="right">Right</button>
+          </div>
+        </div>
+
+        <p id="cameraInfo" class="muted"></p>
+      </div>
+    </div>
+
+    <!-- Review after recording -->
+    <div id="review" class="overlay" hidden>
+      <div class="sheet">
+        <header class="bar">
+          <h2>Your take</h2>
+          <span id="reviewMeta" class="muted"></span>
+        </header>
+        <video id="playback" controls playsinline></video>
+        <div class="row actions">
+          <button id="discardTake" class="btn">Discard</button>
+          <button id="downloadTake" class="btn">Download</button>
+          <button id="shareTake" class="btn primary">Save / Share</button>
+        </div>
+        <p class="muted">"Save / Share" opens Android's share menu, so you can save to Photos or send straight to Instagram or YouTube.</p>
+      </div>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
